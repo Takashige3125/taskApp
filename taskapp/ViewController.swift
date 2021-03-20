@@ -30,7 +30,7 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        
+        print("*")
         // Do any additional setup after loading the view.
         tableView.delegate = self
         tableView.dataSource = self
@@ -43,6 +43,8 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
         for task in taskArray {
             searchResult.append(task.title)
         }
+        
+        
     }
     
     // データの数（＝セルの数）を返すメソッド
@@ -57,7 +59,30 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
         
         // Cellに値を設定する.  --- ここから ---
         let task = taskArray[indexPath.row]
-        cell.textLabel?.text = task.title
+        print(indexPath.row)
+        print(searchBar.text! == "")
+        
+//        if searchResult[indexPath.row] != "" && indexPath.row == 0{
+//            cell.textLabel?.text = searchResult[indexPath.row]
+//        }
+        if(searchBar.text! == ""){
+            cell.textLabel?.text = taskArray[indexPath.row].title
+        }
+        else{
+            if indexPath.row < searchResult.count{
+                let index_num = indexPath.row
+            
+                if searchResult == []{
+                    cell.textLabel?.text = ""
+                }
+                else{
+                    cell.textLabel?.text = searchResult[index_num]
+                }
+            }
+            else{
+                cell.textLabel?.text = ""
+            }
+        }
 
         let formatter = DateFormatter()
         formatter.dateFormat = "yyyy-MM-dd HH:mm"
@@ -144,6 +169,7 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
     // 入力画面から戻ってきた時に TableView を更新させる
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
+        searchBar.delegate = self
         tableView.reloadData()
     }
     
@@ -155,19 +181,19 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
     
     //検索バーに入力された文字が変わったときの呼び出しメソッド
     func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
-            
+        
         //検索結果配列を空にする。
         searchResult.removeAll()
             
         if(searchBar.text == "") {
             //検索文字列が空の場合はすべてを表示する。
-            searchResult = ["あ"]
+            for data in taskArray {
+                searchResult.append(data.title)
+            }
         } else {
             //検索文字列を含むデータを検索結果配列に追加する。
             for data in taskArray {
-                print(data.title)
-                print(searchBar.text!)
-                if data.title == (searchBar.text!) {
+                if data.category.contains(searchBar.text!) {
                     searchResult.append(data.title)
                 }
             }
@@ -175,6 +201,7 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
             
         //テーブルを再読み込みする。
         tableView.reloadData()
+        
     }
 
 }
