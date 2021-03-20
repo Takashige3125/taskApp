@@ -43,8 +43,6 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
         for task in taskArray {
             searchResult.append(task.title)
         }
-        
-        
     }
     
     // データの数（＝セルの数）を返すメソッド
@@ -65,13 +63,13 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
 //        if searchResult[indexPath.row] != "" && indexPath.row == 0{
 //            cell.textLabel?.text = searchResult[indexPath.row]
 //        }
-        if(searchBar.text! == ""){
+       if(searchBar.text! == ""){
             cell.textLabel?.text = taskArray[indexPath.row].title
         }
         else{
             if indexPath.row < searchResult.count{
                 let index_num = indexPath.row
-            
+        
                 if searchResult == []{
                     cell.textLabel?.text = ""
                 }
@@ -109,14 +107,11 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
         // --- ここから ---
         if editingStyle == .delete {
             
-            // データベースから削除する
-            try! realm.write {
-                self.realm.delete(self.taskArray[indexPath.row])
-                tableView.deleteRows(at: [indexPath], with: .fade)
-            }
             // 削除するタスクを取得する
             let task = self.taskArray[indexPath.row]
 
+            
+            
             // ローカル通知をキャンセルする
             let center = UNUserNotificationCenter.current()
             center.removePendingNotificationRequests(withIdentifiers: [String(task.id)])
@@ -129,6 +124,14 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
                     print("---------------/")
                 }
             }
+            
+            // データベースから削除する
+            try! realm.write {
+                print(self.taskArray)
+                self.realm.delete(self.taskArray[indexPath.row])
+                tableView.deleteRows(at: [indexPath], with: .fade)
+            }
+            
         } // --- ここまで変更 ---
     }
     
