@@ -24,6 +24,7 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
     // 日付の近い順でソート：昇順
     // 以降内容をアップデートするとリスト内は自動的に更新される。
     var taskArray = try! Realm().objects(Task.self).sorted(byKeyPath: "date", ascending: true)  // ←追加
+    var taskArray_now = try! Realm().objects(Task.self).sorted(byKeyPath: "date", ascending: true)  // ←追加
     
     //検索結果配列にデータをコピーする。
     var searchResult = [String]()
@@ -47,7 +48,7 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
     
     // データの数（＝セルの数）を返すメソッド
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return taskArray.count
+        return taskArray_now.count
     }
     
     // 各セルの内容を返すメソッド
@@ -56,7 +57,7 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
         let cell = tableView.dequeueReusableCell(withIdentifier: "Cell", for: indexPath)
         
         // Cellに値を設定する.  --- ここから ---
-        let task = taskArray[indexPath.row]
+        let task = taskArray_now[indexPath.row]
         print(indexPath.row)
         print(searchBar.text! == "")
         
@@ -64,7 +65,7 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
 //            cell.textLabel?.text = searchResult[indexPath.row]
 //        }
        if(searchBar.text! == ""){
-            cell.textLabel?.text = taskArray[indexPath.row].title
+            cell.textLabel?.text = taskArray_now[indexPath.row].title
         }
         else{
             if indexPath.row < searchResult.count{
@@ -108,7 +109,7 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
         if editingStyle == .delete {
             
             // 削除するタスクを取得する
-            let task = self.taskArray[indexPath.row]
+            let task = self.taskArray_now[indexPath.row]
 
             
             
@@ -128,7 +129,8 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
             // データベースから削除する
             try! realm.write {
                 print(self.taskArray)
-                self.realm.delete(self.taskArray[indexPath.row])
+                self.realm.delete(self.taskArray_now[indexPath.row])
+//                self.realm.delete(self.taskArray[indexPath.row])
                 tableView.deleteRows(at: [indexPath], with: .fade)
             }
             
@@ -157,7 +159,7 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
 
         if segue.identifier == "cellSegue" {
             let indexPath = self.tableView.indexPathForSelectedRow
-            inputViewController.task = taskArray[indexPath!.row]
+            inputViewController.task = taskArray_now[indexPath!.row]
         } else {
             let task = Task()
 
@@ -193,12 +195,17 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
             for data in taskArray {
                 searchResult.append(data.title)
             }
+            taskArray_now = taskArray
         } else {
-            //検索文字列を含むデータを検索結果配列に追加する。
-            for data in taskArray {
-                if data.category.contains(searchBar.text!) {
-                    searchResult.append(data.title)
-                }
+            taskArray_now = try! Realm().objects(Task.self).filter("category contains %@", searchBar.text!)
+//            //検索文字列を含むデータを検索結果配列に追加する。
+//            for data in taskArray {
+//                if data.category.contains(searchBar.text!) {
+//                    searchResult.append(data.title)
+//                }
+//            }
+            for data in taskArray_now {
+                searchResult.append(data.title)
             }
         }
             
